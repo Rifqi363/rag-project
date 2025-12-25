@@ -1,0 +1,402 @@
+{
+  "name": "Progres 5",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        32
+      ],
+      "id": "30fc81cc-8382-436d-aac7-f6e4ab542cf0",
+      "name": "Telegram Trigger",
+      "webhookId": "23344a61-17f3-4247-9f01-16d43048d9cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "taC1Gi9WydDjY3lX",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"chatInput\": \"{{ $json.body.question || $json.message.text }}\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        32
+      ],
+      "id": "636e062a-d1e2-492e-92c7-ae738ae5d732",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        240
+      ],
+      "id": "c6258000-3056-454f-8181-86fb487a5166",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "9KMBGRkf6ipO6FFu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "website-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "13d61ed0-d6e1-4747-a218-c76184ba65e1",
+      "name": "Webhook",
+      "webhookId": "ff3a5b75-2ead-416a-aaf9-291b7ab43cbb"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=web-app"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        240
+      ],
+      "id": "e2ce7a49-f18e-4d6b-9df7-b4cf6efdc0f0",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "BOMAnYn8od8pfgbf",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "={{ $json.message.text }}",
+        "workflowId": {
+          "__rl": true,
+          "value": "7EMiXNAtC9NgWF2B",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/7EMiXNAtC9NgWF2B",
+          "cachedResultName": "Progres 4"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        256
+      ],
+      "id": "ceecf679-8714-41ac-ac96-08ad70551f8f",
+      "name": "Call 'Progres 4'"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "=Retrieve relevant documents from Pinecone index to help answer user queries.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-index-v2",
+          "mode": "list",
+          "cachedResultName": "rag-index-v2"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        464,
+        224
+      ],
+      "id": "3a8c09cb-b9e1-460d-9041-61419e3a6fa6",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "1Gm9dcw0a8PGUfBL",
+          "name": "PineconeApi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        352
+      ],
+      "id": "43d61b59-547e-4af7-bd59-f09db34e0bb8",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "1EoZNJQ1jXNq05mW",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c778525e-27db-425b-8b13-66f1165c9366",
+              "leftValue": "={{ $('Webhook').isExecuted }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        32
+      ],
+      "id": "f77b6a36-0794-4799-95a9-616ca26a25a9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"reply\": \"{{ $('AI Agent').item.json.output }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        -32
+      ],
+      "id": "9c416d19-f30f-4518-a11c-50a746c67737",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        128
+      ],
+      "id": "a7b48363-03ec-4476-b34b-bfe475d93e7f",
+      "name": "Send a text message",
+      "webhookId": "d53337fb-34d3-4c7a-82a1-3baaa83536ba",
+      "credentials": {
+        "telegramApi": {
+          "id": "taC1Gi9WydDjY3lX",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.result.message_id }}",
+        "text": "={{ $('If').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        224
+      ],
+      "id": "48c49c01-07b9-4a20-8a44-4f433b20589b",
+      "name": "Send a text message1",
+      "webhookId": "699c6881-195a-49ad-b9e0-cf9ba38c25e0",
+      "credentials": {
+        "telegramApi": {
+          "id": "taC1Gi9WydDjY3lX",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Progres 4'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "79bce53b-b3ce-4cc5-9792-16b13d21a220",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e5f31f456b601310f2ba8f5f4113c0b4621a3f362a3938b1a3dddf623ee50aee"
+  },
+  "id": "EWb4rlIJqUTeFUUW",
+  "tags": []
+}
